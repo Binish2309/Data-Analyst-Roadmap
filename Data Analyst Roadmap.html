@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>DataPath — Your Complete Data Analyst Mentor</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0b1426;
+    --navy-mid: #112040;
+    --navy-light: #1a2f57;
+    --gold: #c9973a;
+    --gold-light: #e8b95a;
+    --gold-pale: #f5e4be;
+    --cream: #faf7f2;
+    --white: #ffffff;
+    --text-main: #e8e4dc;
+    --text-muted: #8a99b8;
+    --text-soft: #b8c4d8;
+    --accent-teal: #2dd4bf;
+    --accent-rose: #f87171;
+    --accent-violet: #a78bfa;
+    --card-bg: rgba(17, 32, 64, 0.7);
+    --border: rgba(201, 151, 58, 0.2);
+    --shadow: 0 20px 60px rgba(0,0,0,0.4);
+    --radius: 16px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--navy);
+    color: var(--text-main);
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(ellipse 80% 60% at 10% 0%, rgba(201,151,58,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 80% at 90% 100%, rgba(45,212,191,0.05) 0%, transparent 60%),
+      url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c9973a' fill-opacity='0.02'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  /* ─── SCROLLBAR ─── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--navy-mid); }
+  ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
+
+  /* ─── TOP NAV ─── */
+  .topnav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 2rem;
+    height: 64px;
+    background: rgba(11,20,38,0.9);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo {
+    display: flex; align-items: center; gap: 10px;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem; font-weight: 700;
+    color: var(--white);
+    text-decoration: none;
+  }
+  .logo span { color: var(--gold); }
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+  }
+
+  .hamburger {
+    width: 40px; height: 40px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+    cursor: pointer; background: none; border: none;
+    padding: 6px;
+    border-radius: 8px;
+    transition: background 0.2s;
+  }
+  .hamburger:hover { background: rgba(201,151,58,0.1); }
+  .hamburger span {
+    display: block; width: 22px; height: 2px;
+    background: var(--gold); border-radius: 2px;
+    transition: all 0.3s ease;
+  }
+  .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+  .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  .nav-progress-bar {
+    position: fixed; top: 64px; left: 0; height: 2px; z-index: 999;
+    background: linear-gradient(90deg, var(--gold), var(--accent-teal));
+    width: 0%; transition: width 0.2s;
+  }
+
+  /* ─── SIDEBAR DRAWER ─── */
+  .sidebar-overlay {
+    position: fixed; inset: 0; z-index: 900;
+    background: rgba(0,0,0,0.6);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  .sidebar-overlay.open { opacity: 1; pointer-events: all; }
+
+  .sidebar {
+    position: fixed; top: 0; left: -320px; bottom: 0; width: 320px; z-index: 950;
+    background: var(--navy-mid);
+    border-right: 1px solid var(--border);
+    padding: 80px 0 2rem;
+    overflow-y: auto;
+    transition: left 0.35s cubic-bezier(0.4,0,0.2,1);
+  }
+  .sidebar.open { left: 0; }
+
+  .sidebar-section { padding: 0 1.5rem 1rem; }
+  .sidebar-label {
+    font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--gold); font-weight: 600; margin-bottom: 0.5rem;
+  }
+  .sidebar-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px; border-radius: 10px;
+    cursor: pointer; color: var(--text-soft);
+    font-size: 0.9rem; font-weight: 400;
+    transition: all 0.2s; margin-bottom: 2px;
+    text-decoration: none;
+  }
+  .sidebar-item:hover { background: rgba(201,151,58,0.1); color: var(--gold-pale); }
+  .sidebar-item.active { background: rgba(201,151,58,0.15); color: var(--gold-light); font-weight: 500; }
+  .sidebar-item .icon { font-size: 1.1rem; width: 24px; text-align: center; }
+  .sidebar-divider { height: 1px; background: var(--border); margin: 0.75rem 1.5rem; }
+
+  /* ─── MAIN LAYOUT ─── */
+  .main-wrapper { padding-top: 64px; display: flex; min-height: 100vh; }
+  .content-area { flex: 1; width: 100%; }
+
+  /* ─── HERO ─── */
+  .hero {
+    padding: 5rem 2rem 4rem;
+    max-width: 1100px; margin: 0 auto;
+    animation: fadeUp 0.8s ease both;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(201,151,58,0.12); border: 1px solid rgba(201,151,58,0.3);
+    color: var(--gold-light); padding: 6px 14px; border-radius: 50px;
+    font-size: 0.78rem; font-weight: 500; letter-spacing: 0.05em;
+    margin-bottom: 1.5rem;
+  }
+  .hero-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); animation: pulse 2s infinite; }
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.4rem, 5vw, 3.8rem);
+    line-height: 1.15;
+    color: var(--white); margin-bottom: 1.2rem;
+  }
+  .hero h1 em { color: var(--gold); font-style: italic; }
+  .hero p {
+    font-size: 1.1rem; color: var(--text-soft); max-width: 600px;
+    line-height: 1.7; margin-bottom: 2.5rem;
+  }
+  .hero-cta {
+    display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+  }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: var(--navy); font-weight: 600; font-size: 0.95rem;
+    padding: 12px 28px; border-radius: 50px; cursor: pointer;
+    border: none; transition: all 0.3s; text-decoration: none;
+    box-shadow: 0 4px 20px rgba(201,151,58,0.3);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(201,151,58,0.45); }
+  .btn-ghost {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: transparent; color: var(--text-soft);
+    border: 1px solid rgba(255,255,255,0.15);
+    font-size: 0.95rem; padding: 12px 28px; border-radius: 50px;
+    cursor: pointer; transition: all 0.3s;
+  }
+  .btn-ghost:hover { border-color: var(--gold); color: var(--gold-light); }
+
+  .hero-stats {
+    display: flex; flex-wrap: wrap; gap: 2rem; margin-top: 3.5rem;
+    padding-top: 2.5rem; border-top: 1px solid var(--border);
+  }
+  .stat { display: flex; flex-direction: column; gap: 4px; }
+  .stat-num { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 700; color: var(--gold); }
+  .stat-label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+
+  /* ─── TABS ─── */
+  .tabs-wrapper {
+    padding: 0 2rem;
+    max-width: 1100px; margin: 0 auto 2rem;
+    position: sticky; top: 64px; z-index: 100;
+    padding-top: 1rem; padding-bottom: 0;
+  }
+  .tabs {
+    display: flex; gap: 4px; overflow-x: auto;
+    background: rgba(11,20,38,0.8); backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: 14px; padding: 6px;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    display: flex; align-items: center; gap: 8px;
+    padding: 9px 18px; border-radius: 10px;
+    cursor: pointer; border: none;
+    background: transparent; color: var(--text-muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem; font-weight: 500;
+    white-space: nowrap; transition: all 0.25s;
+  }
+  .tab-btn:hover { color: var(--text-soft); background: rgba(255,255,255,0.04); }
+  .tab-btn.active {
+    background: linear-gradient(135deg, rgba(201,151,58,0.2), rgba(201,151,58,0.1));
+    color: var(--gold-light); font-weight: 600;
+    border: 1px solid rgba(201,151,58,0.3);
+    box-shadow: 0 2px 12px rgba(201,151,58,0.15);
+  }
+  .tab-icon { font-size: 1rem; }
+
+  /* ─── PANELS ─── */
+  .panel { display: none; animation: fadeUp 0.5s ease both; }
+  .panel.active { display: block; }
+
+  .section-wrap { max-width: 1100px; margin: 0 auto; padding: 2rem 2rem 4rem; }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    color: var(--white); margin-bottom: 0.6rem;
+  }
+  .section-title span { color: var(--gold); }
+  .section-sub { color: var(--text-muted); font-size: 1rem; margin-bottom: 2.5rem; max-width: 600px; line-height: 1.6; }
+
+  /* ─── CARDS ─── */
+  .card-grid { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+  .card-grid-2 { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fill, minmax(460px, 1fr)); }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    transition: all 0.3s;
+    position: relative; overflow: hidden;
+    backdrop-filter: blur(10px);
+  }
+  .card::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(201,151,58,0.05) 0%, transparent 60%);
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .card:hover { border-color: rgba(201,151,58,0.4); transform: translateY(-3px); box-shadow: var(--shadow); }
+  .card:hover::before { opacity: 1; }
+
+  .card-icon {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: linear-gradient(135deg, rgba(201,151,58,0.2), rgba(201,151,58,0.05));
+    border: 1px solid rgba(201,151,58,0.25);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem; margin-bottom: 1rem;
+  }
+  .card h3 { font-size: 1.05rem; font-weight: 600; color: var(--white); margin-bottom: 0.5rem; }
+  .card p { font-size: 0.9rem; color: var(--text-muted); line-height: 1.6; }
+  .card-tag {
+    display: inline-block; margin-top: 1rem;
+    padding: 3px 10px; border-radius: 50px;
+    font-size: 0.72rem; font-weight: 600; letter-spacing: 0.05em;
+  }
+  .tag-beginner { background: rgba(45,212,191,0.12); color: var(--accent-teal); border: 1px solid rgba(45,212,191,0.2); }
+  .tag-intermediate { background: rgba(201,151,58,0.12); color: var(--gold-light); border: 1px solid rgba(201,151,58,0.25); }
+  .tag-advanced { background: rgba(167,139,250,0.12); color: var(--accent-violet); border: 1px solid rgba(167,139,250,0.25); }
+
+  /* ─── ROADMAP TIMELINE ─── */
+  .roadmap { position: relative; padding-left: 2.5rem; }
+  .roadmap::before {
+    content: ''; position: absolute;
+    left: 10px; top: 8px; bottom: 8px;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--gold), var(--accent-teal), var(--accent-violet));
+    border-radius: 2px;
+  }
+  .rm-phase { position: relative; margin-bottom: 2.5rem; }
+  .rm-dot {
+    position: absolute; left: -2.15rem; top: 6px;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--navy-mid);
+    border: 3px solid var(--gold);
+    z-index: 2;
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+  .rm-dot.teal { border-color: var(--accent-teal); }
+  .rm-dot.violet { border-color: var(--accent-violet); }
+  .rm-dot.rose { border-color: var(--accent-rose); }
+  .rm-dot:hover { transform: scale(1.4); }
+
+  .rm-phase-header {
+    display: flex; align-items: flex-start; gap: 12px; margin-bottom: 1rem;
+    cursor: pointer;
+  }
+  .rm-phase-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem; color: var(--gold); font-weight: 500;
+    background: rgba(201,151,58,0.12); padding: 3px 8px;
+    border-radius: 6px; border: 1px solid rgba(201,151,58,0.2);
+    white-space: nowrap; margin-top: 2px;
+  }
+  .rm-phase-title { font-size: 1.15rem; font-weight: 600; color: var(--white); }
+  .rm-phase-duration { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+
+  .rm-skills {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-top: 0.75rem;
+  }
+  .rm-skill-pill {
+    padding: 5px 12px; border-radius: 50px;
+    font-size: 0.8rem; background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08); color: var(--text-soft);
+    transition: all 0.2s; cursor: default;
+  }
+  .rm-skill-pill:hover { background: rgba(201,151,58,0.12); border-color: rgba(201,151,58,0.25); color: var(--gold-pale); }
+
+  .rm-expand-body {
+    background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+    border-radius: 12px; padding: 1.25rem;
+    margin-top: 0.75rem;
+    display: none;
+  }
+  .rm-expand-body.open { display: block; animation: fadeUp 0.3s ease; }
+  .rm-expand-body ul { padding-left: 1.2rem; }
+  .rm-expand-body li { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 6px; line-height: 1.6; }
+  .rm-expand-body li strong { color: var(--text-soft); }
+
+  /* ─── TOOLS GRID ─── */
+  .tools-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+  .tool-card {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 12px; padding: 1.25rem;
+    display: flex; flex-direction: column; gap: 10px;
+    transition: all 0.25s; cursor: default;
+    backdrop-filter: blur(8px);
+  }
+  .tool-card:hover { border-color: rgba(201,151,58,0.35); transform: translateY(-2px); }
+  .tool-logo { font-size: 1.8rem; }
+  .tool-name { font-weight: 600; font-size: 0.95rem; color: var(--white); }
+  .tool-desc { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; }
+  .tool-level { font-size: 0.72rem; }
+
+  /* ─── RESOURCES ─── */
+  .resource-row {
+    display: flex; align-items: center; gap: 16px;
+    padding: 1rem 1.25rem;
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 12px; margin-bottom: 10px;
+    transition: all 0.25s; text-decoration: none; color: inherit;
+    backdrop-filter: blur(8px);
+  }
+  .resource-row:hover { border-color: rgba(201,151,58,0.4); transform: translateX(4px); }
+  .resource-icon { font-size: 1.5rem; width: 40px; text-align: center; flex-shrink: 0; }
+  .resource-info { flex: 1; }
+  .resource-name { font-weight: 600; font-size: 0.95rem; color: var(--white); }
+  .resource-meta { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+  .resource-badge {
+    padding: 4px 10px; border-radius: 50px; font-size: 0.72rem; font-weight: 600;
+    white-space: nowrap;
+  }
+  .badge-free { background: rgba(45,212,191,0.12); color: var(--accent-teal); border: 1px solid rgba(45,212,191,0.2); }
+  .badge-paid { background: rgba(201,151,58,0.12); color: var(--gold-light); border: 1px solid rgba(201,151,58,0.2); }
+  .badge-mixed { background: rgba(167,139,250,0.12); color: var(--accent-violet); border: 1px solid rgba(167,139,250,0.2); }
+
+  /* ─── AI MENTOR CHAT ─── */
+  .mentor-wrap {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;
+    align-items: start;
+  }
+  @media(max-width: 768px) { .mentor-wrap { grid-template-columns: 1fr; } }
+
+  .chat-panel {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden;
+    backdrop-filter: blur(10px);
+  }
+  .chat-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .chat-avatar {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--accent-teal));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+  }
+  .chat-name { font-weight: 600; font-size: 0.95rem; color: var(--white); }
+  .chat-status { font-size: 0.75rem; color: var(--accent-teal); }
+  .online-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent-teal); margin-right: 4px; animation: pulse 2s infinite; }
+
+  .chat-messages {
+    height: 340px; overflow-y: auto; padding: 1.25rem;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .msg { display: flex; gap: 10px; animation: fadeUp 0.3s ease both; }
+  .msg.user { flex-direction: row-reverse; }
+  .msg-bubble {
+    max-width: 80%; padding: 10px 14px; border-radius: 14px;
+    font-size: 0.88rem; line-height: 1.6;
+  }
+  .msg-bubble.bot {
+    background: rgba(201,151,58,0.1); border: 1px solid rgba(201,151,58,0.2);
+    color: var(--text-main); border-radius: 14px 14px 14px 4px;
+  }
+  .msg-bubble.user-msg {
+    background: rgba(45,212,191,0.12); border: 1px solid rgba(45,212,191,0.2);
+    color: var(--text-main); border-radius: 14px 14px 4px 14px;
+  }
+  .msg-mini-avatar {
+    width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 0.8rem;
+    background: rgba(201,151,58,0.2);
+  }
+
+  .chat-input-row {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--border);
+    display: flex; gap: 8px;
+  }
+  .chat-input {
+    flex: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 14px;
+    color: var(--text-main); font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem; outline: none; transition: border 0.2s;
+    resize: none;
+  }
+  .chat-input:focus { border-color: rgba(201,151,58,0.4); }
+  .chat-send {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    border: none; cursor: pointer; color: var(--navy);
+    font-size: 1rem; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .chat-send:hover { transform: scale(1.05); }
+
+  .quick-qs { display: flex; flex-direction: column; gap: 8px; }
+  .quick-q-title { font-size: 0.8rem; color: var(--gold); font-weight: 600; margin-bottom: 4px; letter-spacing: 0.05em; text-transform: uppercase; }
+  .quick-q-btn {
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 14px; cursor: pointer;
+    color: var(--text-soft); font-size: 0.85rem; text-align: left;
+    transition: all 0.2s; font-family: 'DM Sans', sans-serif;
+  }
+  .quick-q-btn:hover { background: rgba(201,151,58,0.08); border-color: rgba(201,151,58,0.3); color: var(--gold-pale); }
+
+  /* ─── SALARY / CAREER ─── */
+  .salary-cards { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); margin-bottom: 2rem; }
+  .sal-card {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 14px; padding: 1.25rem;
+    backdrop-filter: blur(8px);
+  }
+  .sal-role { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 4px; }
+  .sal-amount { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--white); font-weight: 700; }
+  .sal-range { font-size: 0.78rem; color: var(--accent-teal); margin-top: 4px; }
+  .sal-bar { height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; margin-top: 10px; overflow: hidden; }
+  .sal-bar-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--gold), var(--gold-light)); }
+
+  /* ─── BACKGROUNDS section ─── */
+  .bg-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+  .bg-card {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 14px; padding: 1.5rem;
+    position: relative; overflow: hidden;
+    backdrop-filter: blur(8px); transition: all 0.3s;
+  }
+  .bg-card:hover { transform: translateY(-3px); border-color: rgba(201,151,58,0.35); }
+  .bg-card-accent {
+    position: absolute; top: 0; right: 0;
+    width: 80px; height: 80px; border-radius: 0 14px 0 80px;
+    opacity: 0.12;
+  }
+  .bg-emoji { font-size: 2rem; margin-bottom: 0.75rem; }
+  .bg-title { font-weight: 700; font-size: 1rem; color: var(--white); margin-bottom: 0.5rem; }
+  .bg-sub { font-size: 0.85rem; color: var(--text-muted); line-height: 1.55; }
+  .bg-advantage {
+    margin-top: 1rem; padding: 8px 12px; border-radius: 8px;
+    background: rgba(45,212,191,0.07); border: 1px solid rgba(45,212,191,0.15);
+    font-size: 0.8rem; color: var(--accent-teal);
+  }
+  .bg-advantage::before { content: '✦ '; }
+
+  /* ─── CHECKLIST ─── */
+  .checklist { display: flex; flex-direction: column; gap: 8px; }
+  .check-item {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 12px 16px; border-radius: 12px;
+    background: var(--card-bg); border: 1px solid var(--border);
+    cursor: pointer; transition: all 0.2s;
+    backdrop-filter: blur(8px);
+  }
+  .check-item:hover { border-color: rgba(201,151,58,0.3); }
+  .check-item.done { opacity: 0.7; }
+  .check-box {
+    width: 22px; height: 22px; border-radius: 6px; flex-shrink: 0;
+    border: 2px solid rgba(201,151,58,0.4);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem; transition: all 0.25s; margin-top: 1px;
+  }
+  .check-item.done .check-box { background: var(--gold); border-color: var(--gold); color: var(--navy); }
+  .check-text { font-size: 0.9rem; color: var(--text-soft); line-height: 1.5; }
+  .check-item.done .check-text { text-decoration: line-through; color: var(--text-muted); }
+  .progress-row { display: flex; align-items: center; gap: 12px; margin-bottom: 1.5rem; }
+  .progress-track { flex: 1; height: 8px; background: rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--gold), var(--accent-teal)); transition: width 0.4s; }
+  .progress-label { font-size: 0.85rem; color: var(--gold); font-weight: 600; white-space: nowrap; }
+
+  /* ─── INTERVIEW SECTION ─── */
+  .qa-list { display: flex; flex-direction: column; gap: 10px; }
+  .qa-item {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden;
+    backdrop-filter: blur(8px); transition: border 0.2s;
+  }
+  .qa-item:hover { border-color: rgba(201,151,58,0.3); }
+  .qa-q {
+    padding: 1rem 1.25rem; cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 0.9rem; font-weight: 500; color: var(--text-soft);
+    gap: 12px;
+  }
+  .qa-q:hover { color: var(--gold-pale); }
+  .qa-chevron { font-size: 0.7rem; transition: transform 0.3s; flex-shrink: 0; color: var(--gold); }
+  .qa-item.open .qa-chevron { transform: rotate(180deg); }
+  .qa-a {
+    padding: 0 1.25rem; max-height: 0; overflow: hidden;
+    transition: max-height 0.4s ease, padding 0.3s;
+    font-size: 0.88rem; color: var(--text-muted); line-height: 1.7;
+  }
+  .qa-item.open .qa-a { max-height: 400px; padding: 0 1.25rem 1rem; }
+  .qa-a code {
+    font-family: 'DM Mono', monospace; background: rgba(255,255,255,0.06);
+    padding: 2px 6px; border-radius: 4px; font-size: 0.82rem; color: var(--accent-teal);
+  }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media(max-width: 640px) {
+    .hero { padding: 3rem 1.25rem 2.5rem; }
+    .tabs-wrapper { padding: 0.5rem 1rem 0; }
+    .section-wrap { padding: 1.5rem 1.25rem 3rem; }
+    .card-grid-2 { grid-template-columns: 1fr; }
+    .mentor-wrap { grid-template-columns: 1fr; }
+  }
+
+  /* ─── CALLOUT BOX ─── */
+  .callout {
+    display: flex; gap: 14px; align-items: flex-start;
+    background: rgba(201,151,58,0.07); border: 1px solid rgba(201,151,58,0.2);
+    border-radius: 12px; padding: 1.1rem 1.25rem;
+    margin-bottom: 2rem;
+  }
+  .callout-icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 1px; }
+  .callout p { font-size: 0.88rem; color: var(--text-soft); line-height: 1.65; }
+  .callout p strong { color: var(--gold-light); }
+
+  /* typing indicator */
+  .typing-dots { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
+  .typing-dots span {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--gold);
+    animation: bounce 1.2s infinite;
+  }
+  .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce {
+    0%,80%,100% { transform: translateY(0); opacity: 0.5; }
+    40% { transform: translateY(-6px); opacity: 1; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="topnav">
+  <a href="#" class="logo" onclick="showPanel('home'); return false;">
+    <div class="logo-icon">📊</div>
+    Data<span>Path</span>
+  </a>
+  <button class="hamburger" id="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+<div class="nav-progress-bar" id="progressBar"></div>
+
+<!-- SIDEBAR -->
+<div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-section">
+    <div class="sidebar-label">Navigation</div>
+    <a class="sidebar-item active" onclick="showPanel('home'); closeSidebar();" href="#">
+      <span class="icon">🏠</span> Home & Overview
+    </a>
+    <a class="sidebar-item" onclick="showPanel('roadmap'); closeSidebar();" href="#">
+      <span class="icon">🗺️</span> Learning Roadmap
+    </a>
+    <a class="sidebar-item" onclick="showPanel('skills'); closeSidebar();" href="#">
+      <span class="icon">🛠️</span> Skills & Tools
+    </a>
+    <a class="sidebar-item" onclick="showPanel('backgrounds'); closeSidebar();" href="#">
+      <span class="icon">🎓</span> Your Background
+    </a>
+    <a class="sidebar-item" onclick="showPanel('resources'); closeSidebar();" href="#">
+      <span class="icon">📚</span> Free Resources
+    </a>
+    <a class="sidebar-item" onclick="showPanel('mentor'); closeSidebar();" href="#">
+      <span class="icon">🤖</span> AI Mentor Chat
+    </a>
+    <a class="sidebar-item" onclick="showPanel('career'); closeSidebar();" href="#">
+      <span class="icon">💼</span> Career & Salary
+    </a>
+    <a class="sidebar-item" onclick="showPanel('interview'); closeSidebar();" href="#">
+      <span class="icon">🎤</span> Interview Prep
+    </a>
+    <a class="sidebar-item" onclick="showPanel('tracker'); closeSidebar();" href="#">
+      <span class="icon">✅</span> Progress Tracker
+    </a>
+  </div>
+  <div class="sidebar-divider"></div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">About</div>
+    <div style="font-size:0.82rem; color:var(--text-muted); line-height:1.6;">
+      DataPath is your all-in-one companion for becoming a data analyst — regardless of your background.
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main-wrapper">
+  <div class="content-area">
+
+    <!-- TABS -->
+    <div class="tabs-wrapper" id="tabsWrapper">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('home', this)"><span class="tab-icon">🏠</span> Home</button>
+        <button class="tab-btn" onclick="switchTab('roadmap', this)"><span class="tab-icon">🗺️</span> Roadmap</button>
+        <button class="tab-btn" onclick="switchTab('skills', this)"><span class="tab-icon">🛠️</span> Skills</button>
+        <button class="tab-btn" onclick="switchTab('backgrounds', this)"><span class="tab-icon">🎓</span> Backgrounds</button>
+        <button class="tab-btn" onclick="switchTab('resources', this)"><span class="tab-icon">📚</span> Resources</button>
+        <button class="tab-btn" onclick="switchTab('mentor', this)"><span class="tab-icon">🤖</span> AI Mentor</button>
+        <button class="tab-btn" onclick="switchTab('career', this)"><span class="tab-icon">💼</span> Career</button>
+        <button class="tab-btn" onclick="switchTab('interview', this)"><span class="tab-icon">🎤</span> Interview</button>
+        <button class="tab-btn" onclick="switchTab('tracker', this)"><span class="tab-icon">✅</span> Tracker</button>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════ HOME ════════════════════════════════ -->
+    <div class="panel active" id="panel-home">
+      <div class="hero">
+        <div class="hero-badge"><span class="dot"></span> Complete Data Analyst Mentor</div>
+        <h1>Your Path to Becoming a<br/><em>Data Analyst</em> Starts Here</h1>
+        <p>Whether you're from arts, commerce, science, or any non-tech field — this all-in-one guide walks you through every step, skill, tool, and resource you need to land your first data analyst role.</p>
+        <div class="hero-cta">
+          <button class="btn-primary" onclick="switchTab('roadmap', document.querySelectorAll('.tab-btn')[1])">🗺️ View My Roadmap</button>
+          <button class="btn-ghost" onclick="switchTab('mentor', document.querySelectorAll('.tab-btn')[5])">🤖 Ask the AI Mentor</button>
+        </div>
+        <div class="hero-stats">
+          <div class="stat"><div class="stat-num">9</div><div class="stat-label">Learning Phases</div></div>
+          <div class="stat"><div class="stat-num">30+</div><div class="stat-label">Tools Covered</div></div>
+          <div class="stat"><div class="stat-num">50+</div><div class="stat-label">Free Resources</div></div>
+          <div class="stat"><div class="stat-num">8</div><div class="stat-label">Backgrounds Covered</div></div>
+        </div>
+      </div>
+
+      <div class="section-wrap" style="padding-top:0">
+        <div class="callout">
+          <span class="callout-icon">💡</span>
+          <p><strong>You don't need a CS degree.</strong> Many successful data analysts come from economics, psychology, biology, business, or even arts. What matters is curiosity, logical thinking, and the right structured learning plan — all of which you'll find here.</p>
+        </div>
+
+        <h2 class="section-title">What Does a <span>Data Analyst</span> Do?</h2>
+        <p class="section-sub">Data analysts collect, clean, analyze, and visualize data to help organizations make better decisions.</p>
+        <div class="card-grid">
+          <div class="card"><div class="card-icon">🔍</div><h3>Data Collection & Cleaning</h3><p>Gather raw data from databases, spreadsheets, and APIs. Clean inconsistencies, handle missing values, and prepare data for analysis.</p><span class="card-tag tag-beginner">Core Skill</span></div>
+          <div class="card"><div class="card-icon">📊</div><h3>Exploratory Analysis</h3><p>Find patterns, trends, and anomalies in datasets using statistics and visualization to uncover hidden insights.</p><span class="card-tag tag-beginner">Core Skill</span></div>
+          <div class="card"><div class="card-icon">📈</div><h3>Data Visualization</h3><p>Build dashboards and charts in Tableau, Power BI, or Python to communicate insights to non-technical stakeholders.</p><span class="card-tag tag-intermediate">Important</span></div>
+          <div class="card"><div class="card-icon">🗄️</div><h3>SQL & Database Querying</h3><p>Extract and manipulate data from relational databases using SQL — the #1 most-demanded data analyst skill.</p><span class="card-tag tag-beginner">Must-Have</span></div>
+          <div class="card"><div class="card-icon">📋</div><h3>Reporting & Storytelling</h3><p>Present findings in clear, compelling reports and presentations that drive business decisions.</p><span class="card-tag tag-intermediate">Important</span></div>
+          <div class="card"><div class="card-icon">🤝</div><h3>Stakeholder Communication</h3><p>Translate complex data into plain language for business leaders, clients, and cross-functional teams.</p><span class="card-tag tag-intermediate">Vital</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════ ROADMAP ════════════════════════════════ -->
+    <div class="panel" id="panel-roadmap">
+      <div class="section-wrap">
+        <h2 class="section-title">The Complete <span>Roadmap</span></h2>
+        <p class="section-sub">Follow these phases in order. Click any phase to expand detailed guidance. Each phase builds on the previous — don't skip foundations!</p>
+
+        <div class="roadmap">
+
+          <div class="rm-phase">
+            <div class="rm-dot" style="border-color:var(--gold)"></div>
+            <div class="rm-phase-header" onclick="togglePhase(this)">
+              <span class="rm-phase-num">Phase 01</span>
+              <div><div class="rm-phase-title">Foundation Mindset & Setup</div><div class="rm-phase-duration">⏱ 1–2 weeks</div></div>
+            </div>
+            <div class="rm-skills"><span class="rm-skill-pill">Growth Mindset</span><span class="rm-skill-pill">Goal Setting</span><span class="rm-skill-pill">Tools Installation</span><span class="rm-skill-pill">Learning Plan</span></div>
+            <div class="rm-expand-body">
+              <ul>
+                <li><strong>Understand the role:</strong> Research what data analysts actually do day-to-day. Read job descriptions on LinkedIn and Glassdoor.</li>
+                <li><strong>Set a timeline:</strong> Commit to 1–2 hours/day minimum. Most people land entry roles within 6–12 months of consistent learning.</li>
+                <li><strong>Install your toolkit:</strong> Download Python (Anaconda), VS Code, and create free accounts on Kaggle, Google Colab, and GitHub.</li>
+                <li><strong>Build a learning journal:</strong> Document what you learn each day — this doubles as portfolio evidence later.</li>
+                <li><strong>Join communities:</strong> Reddit r/dataanalysis, Kaggle forums, and LinkedIn groups for accountability and support.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="rm-phase">
+            <div class="rm-dot"></div>
+            <div class="rm-phase-header" onclick="togglePhase(this)">
+              <span class="rm-phase-num">Phase 02</span>
+              <div><div class="rm-phase-title">Excel & Spreadsheet Mastery</div><div class="rm-phase-duration">⏱ 2–3 weeks</div></div>
+            </div>
+            <div class="rm-skills"><span class="rm-skill-pill">Excel</span><span class="rm-skill-pill">Google Sheets</span><span class="rm-skill-pill">Pivot Tables</span><span class="rm-skill-pill">VLOOKUP</span><span class="rm-skill-pill">Charts</span></div>
+            <div class="rm-expand-body">
+              <ul>
+                <li><strong>Why Excel first?</strong> Most businesses still rely heavily on Excel. It's the fastest way to get comfortable with data.</li>
+                <li><strong>Learn:</strong> Formulas (SUM, IF, COUNTIF, VLOOKUP, INDEX-MATCH), Pivot Tables, Data Validation, Conditional Formatting.</li>
+                <li><strong>Practice:</strong> Download 3 free datasets from Kaggle and analyze them purely in Excel before moving on.</li>
+                <li><strong>Google Sheets:</strong> Learn the same skills in Sheets — it's free and collaborative, great for portfolio projects.</li>
+                <li><strong>Mini project:</strong> Build a sales dashboard with charts and pivot tables using any publicly available dataset.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="rm-phase">
+            <div class="rm-dot teal"></div>
+            <div class="rm-phase-header" onclick="togglePhase(this)">
+              <span class="rm-phase-num">Phase 03</span>
+              <div><div class="rm-phase-title">SQL — The Core Language</div><div class="rm-phase-duration">⏱ 4–6 weeks</div></div>
+            </div>
+            <div class="rm-skills"><span class="rm-skill-pill">SELECT / WHERE</span><span class="rm-skill-pill">JOINs</span><span class="rm-skill-pill">GROUP BY</span><span class="rm-skill-pill">Subqueries</span><span class="rm-skill-pill">Window Functions</span><span class="rm-skill-pill">CTEs</span></div>
+            <div class="rm-expand-body">
+              <ul>
+                <li><strong>SQL is non-negotiable.</strong> It appears in ~90% of data analyst job descriptions. Treat it like your professional language.</li>
+                <li><strong>Start with:</strong> SQLZoo (free), Mode Analytics SQL Tutorial, or Khan Academy's SQL course.</li>
+                <li><strong>Master:</strong> SELECT, WHERE, GROUP BY, ORDER BY, all JOINs (INNER, LEFT, RIGHT, FULL), subqueries, CTEs, Window Functions (ROW_NUMBER, RANK, LAG, LEAD).</li>
+                <li><strong>Practice databases:</strong> Use free MySQL/PostgreSQL on db-fiddle.com or install SQLite locally.</li>
+                <li><strong>Real dataset practice:</strong> Practice on Kaggle SQL courses which use real BigQuery data.</li>
+                <li><strong>Project:</strong> Write 20+ queries answering business questions from a database of your choice. Document them on GitHub.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="rm-phase">
+            <div class="rm-dot teal"></div>
+            <div class="rm-phase-header" onclick="togglePhase(this)">
+              <span class="rm-phase-num">Phase 04</span>
+              <div><div class="rm-phase-title">Statistics & Math Foundations</div><div class="rm-phase-duration">⏱ 3–4 weeks</div></div>
+            </div>
+            <div class="rm-skills"><span class="rm-skill-pill">Descriptive Stats</span><span class="rm-skill-pill">Probability</span><span class="rm-skill-pill">Distributions</span><span class="rm-skill-pill">Hypothesis Testing</span><span class="rm-skill-pill">Correlation</span></div>
+            <div class="rm-expand-body">
+              <ul>
+                <li><strong>You need to understand</strong> mean, median, mode, standard deviation, variance — these come up every day.</li>
+                <li><strong>Learn:</strong> Probability basics, normal distribution, skewness, hypothesis testing (p-values, t-tests), correlation vs causation.</li>
+                <li><strong>Free resources:</strong> Khan Academy Statistics (start here), StatQuest on YouTube (excellent visual explanations).</li>
+                <li><strong>Don't overthink:</strong> You don't need calculus. Focus on applied statistics, not theory.</li>
+                <li><strong>Apply it:</strong> Perform a basic EDA (Exploratory Data Analysis) on a dataset and describe what the statistics tell you.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="rm-phase">
+            <div class="rm-dot violet"></div>
+            <div class="rm-phase-header" onclick="togglePhase(this)">
+              <span class="rm-phase-num">Phase 05</span>
+              <div><div class="rm-phase-title">Python for Data Analysis</div><div class="rm-phase-duration">⏱ 6–8 weeks</div></div>
+            </div>
+            <div class="rm-skills"><span class="rm-skill-pill">Python Basics</span><span class="rm-skill-pill">Pandas</span><span class="rm-skill-pill">NumPy</span><span class="rm-skill-pill">Matplotlib</span><span class="rm-skill-pill">Seaborn</span><span class="rm-skill-pill">Jupyter</span></div>
+            <div class="rm-expand-body">
+              <ul>
+                <li><strong>Start with Python basics:</strong> Variables, loops, functions, lists, dictionaries, file I/O. Use freeCodeCamp or CS50P.</li>
+                <li><strong>Pandas:</strong> The most important library. Learn DataFrames, Series, read_csv, filtering, groupby, merge, apply, and handling missing data.</li>
+                <li><strong>NumPy:</strong> Arrays, array operations, broadcasting — foundational for all data work.</li>
+                <li><strong>Visualization:</strong> Matplotlib for basics, Seaborn for beautiful statistical plots. Practice building histograms, scatter plots, heatmaps, box plots.</li>
+                <li><strong>Jupyter Notebooks:</strong> Your daily workspace. Learn to write clean, documented notebooks.</li>
+                <li><strong>Projects:</strong> EDA project on a Kaggle dataset — clean data, analyze, visualize 10+ insights, publish notebook publicly.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="rm-phase">
+            <div class="rm-dot violet"></div>
+            <div class="rm-phase-header" onclick="togglePhase(this)">
+              <span class="rm-phase-num">Phase 06</span>
+              <div><div class="rm-phase-title">Data Visualization & Dashboards</div><div class="rm-phase-duration">⏱ 3–4 weeks</div></div>
+            </div>
+            <div class="rm-skills"><span class="rm-skill-pill">Tableau Public</span><span class="rm-skill-pill">Power BI</span><span class="rm-skill-pill">Plotly</span><span class="rm-skill-pill">Dashboard Design</span><span class="rm-skill-pill">Storytelling</span></div>
+            <div class="rm-expand-body">
+              <ul>
+                <li><strong>Tableau Public is FREE</strong> and the industry leader. Build 3–5 interactive dashboards and publish them — this is your most visible portfolio work.</li>
+                <li><strong>Power BI Desktop is also free.</strong> Very popular in corporate environments, especially in finance and operations.</li>
+                <li><strong>Plotly/Dash:</strong> For Python lovers — build interactive web-based charts.</li>
+                <li><strong>Design principles:</strong> Less is more. Choose chart types intentionally. Use color purposefully. Learn the Gestalt principles of visual perception.</li>
+                <li><strong>Storytelling:</strong> Every dashboard should answer a specific business question. Practice narrating your visualizations out loud.</li>
+                <li><strong>Project:</strong> Rebuild a famous public dashboard and add your own insights. Share on LinkedIn with explanation.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="rm-phase">
+            <div class="rm-dot rose"></div>
+            <div class="rm-phase-header" onclick="togglePhase(this)">
+              <span class="rm-phase-num">Phase 07</span>
+              <div><div class="rm-phase-title">Portfolio Building</div><div class="rm-phase-duration">⏱ Ongoing from Phase 4</div></div>
+            </div>
+            <div class="rm-skills"><span class="rm-skill-pill">GitHub</span><span class="rm-skill-pill">Kaggle Profile</span><span class="rm-skill-pill">LinkedIn</span><span class="rm-skill-pill">Tableau Public</span><span class="rm-skill-pill">Case Studies</span></div>
+            <div class="rm-expand-body">
+              <ul>
+                <li><strong>Your portfolio is your degree substitute.</strong> 3–5 strong projects beat a CS degree for many employers.</li>
+                <li><strong>GitHub:</strong> Every project gets a GitHub repository with a clear README explaining the problem, approach, and findings.</li>
+                <li><strong>Project ideas:</strong> Sales analysis, customer churn analysis, COVID data analysis, sports statistics, financial market trends, social media sentiment.</li>
+                <li><strong>Quality over quantity:</strong> 3 deep, well-documented projects > 10 shallow ones.</li>
+                <li><strong>LinkedIn:</strong> Post about each project. Write a 3-paragraph post explaining what you learned. This builds visibility.</li>
+                <li><strong>Kaggle competitions:</strong> Participate in beginner competitions. Even finishing in the top 50% shows initiative.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="rm-phase">
+            <div class="rm-dot rose"></div>
+            <div class="rm-phase-header" onclick="togglePhase(this)">
+              <span class="rm-phase-num">Phase 08</span>
+              <div><div class="rm-phase-title">Job Search & Applications</div><div class="rm-phase-duration">⏱ 4–8 weeks</div></div>
+            </div>
+            <div class="rm-skills"><span class="rm-skill-pill">Resume Writing</span><span class="rm-skill-pill">LinkedIn Optimization</span><span class="rm-skill-pill">Job Boards</span><span class="rm-skill-pill">Networking</span><span class="rm-skill-pill">Cold Outreach</span></div>
+            <div class="rm-expand-body">
+              <ul>
+                <li><strong>Resume:</strong> One page, ATS-optimized. Lead with a skills section showing SQL, Python, Excel, Tableau/Power BI. Quantify everything ("Reduced reporting time by 40%").</li>
+                <li><strong>LinkedIn:</strong> Optimize your headline (e.g. "Aspiring Data Analyst | SQL · Python · Tableau"). Add all projects. Post content weekly.</li>
+                <li><strong>Job boards:</strong> LinkedIn Jobs, Indeed, Glassdoor, AngelList (for startups), Wellfound, company careers pages directly.</li>
+                <li><strong>Target:</strong> Apply for "Data Analyst", "Junior Data Analyst", "Business Analyst", "Reporting Analyst", "Marketing Analyst" — these are all entry points.</li>
+                <li><strong>Networking:</strong> Message 5 data professionals per week. Not asking for jobs — asking for advice. 60% of jobs come through referrals.</li>
+                <li><strong>Volume + quality:</strong> Aim for 10–15 quality applications per week with tailored cover letters.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="rm-phase">
+            <div class="rm-dot" style="border-color:var(--accent-teal)"></div>
+            <div class="rm-phase-header" onclick="togglePhase(this)">
+              <span class="rm-phase-num">Phase 09</span>
+              <div><div class="rm-phase-title">Continuous Growth (Post-Hire)</div><div class="rm-phase-duration">⏱ Ongoing career</div></div>
+            </div>
+            <div class="rm-skills"><span class="rm-skill-pill">Advanced SQL</span><span class="rm-skill-pill">dbt</span><span class="rm-skill-pill">Cloud (AWS/GCP)</span><span class="rm-skill-pill">Machine Learning Basics</span><span class="rm-skill-pill">Soft Skills</span></div>
+            <div class="rm-expand-body">
+              <ul>
+                <li>Once hired, focus on deepening domain expertise in your industry (e.g. fintech, healthcare, e-commerce).</li>
+                <li>Learn dbt (data build tool) for data transformation — it's becoming a standard in modern data stacks.</li>
+                <li>Explore cloud data platforms: Google BigQuery, AWS Redshift, Snowflake.</li>
+                <li>Dabble in ML: Linear regression, clustering — you don't need to become an ML engineer, but understanding models makes you more valuable.</li>
+                <li>Soft skills matter enormously: stakeholder management, business acumen, and presenting to executives will define your career growth.</li>
+              </ul>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════ SKILLS ════════════════════════════════ -->
+    <div class="panel" id="panel-skills">
+      <div class="section-wrap">
+        <h2 class="section-title">Essential <span>Skills & Tools</span></h2>
+        <p class="section-sub">Every tool a modern data analyst needs, with context on when and how to use each one.</p>
+
+        <h3 style="color:var(--gold-light); font-size:0.8rem; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:1rem;">📊 Data & Databases</h3>
+        <div class="tools-grid" style="margin-bottom:2rem">
+          <div class="tool-card"><div class="tool-logo">🗄️</div><div class="tool-name">SQL</div><div class="tool-desc">Query relational databases. Used in every data role, every industry. Learn MySQL or PostgreSQL.</div><span class="card-tag tag-beginner tool-level">Must-Have</span></div>
+          <div class="tool-card"><div class="tool-logo">📗</div><div class="tool-name">Excel / Sheets</div><div class="tool-desc">Pivot tables, formulas, charting. Your first and most universally used data tool.</div><span class="card-tag tag-beginner tool-level">Must-Have</span></div>
+          <div class="tool-card"><div class="tool-logo">🐼</div><div class="tool-name">Pandas (Python)</div><div class="tool-desc">Python's data manipulation powerhouse. Think of it as a programmable Excel.</div><span class="card-tag tag-intermediate tool-level">Core</span></div>
+          <div class="tool-card"><div class="tool-logo">❄️</div><div class="tool-name">Snowflake</div><div class="tool-desc">Cloud data warehouse used at scale. Learning it sets you apart in the job market.</div><span class="card-tag tag-advanced tool-level">Advanced</span></div>
+          <div class="tool-card"><div class="tool-logo">🔵</div><div class="tool-name">BigQuery (Google)</div><div class="tool-desc">Serverless data warehouse. Free tier available. Great for practicing at scale.</div><span class="card-tag tag-intermediate tool-level">Valuable</span></div>
+          <div class="tool-card"><div class="tool-logo">🔴</div><div class="tool-name">AWS Redshift</div><div class="tool-desc">Amazon's cloud data warehouse. Common in enterprise environments.</div><span class="card-tag tag-advanced tool-level">Advanced</span></div>
+        </div>
+
+        <h3 style="color:var(--gold-light); font-size:0.8rem; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:1rem;">📈 Visualization</h3>
+        <div class="tools-grid" style="margin-bottom:2rem">
+          <div class="tool-card"><div class="tool-logo">🔵</div><div class="tool-name">Tableau</div><div class="tool-desc">Most in-demand BI tool. Free Public version. Build stunning interactive dashboards.</div><span class="card-tag tag-intermediate tool-level">High-Demand</span></div>
+          <div class="tool-card"><div class="tool-logo">🟡</div><div class="tool-name">Power BI</div><div class="tool-desc">Microsoft's BI tool. Dominant in corporate/enterprise settings. Free desktop version.</div><span class="card-tag tag-intermediate tool-level">High-Demand</span></div>
+          <div class="tool-card"><div class="tool-logo">📊</div><div class="tool-name">Matplotlib / Seaborn</div><div class="tool-desc">Python visualization libraries. Matplotlib for control, Seaborn for beautiful statistical charts.</div><span class="card-tag tag-intermediate tool-level">Core</span></div>
+          <div class="tool-card"><div class="tool-logo">🌊</div><div class="tool-name">Plotly</div><div class="tool-desc">Interactive charts in Python. Build web-ready visualizations with minimal code.</div><span class="card-tag tag-intermediate tool-level">Great Add-on</span></div>
+          <div class="tool-card"><div class="tool-logo">🔍</div><div class="tool-name">Looker / Looker Studio</div><div class="tool-desc">Google's BI platform. Free via Looker Studio. Common in tech startups.</div><span class="card-tag tag-intermediate tool-level">Valuable</span></div>
+          <div class="tool-card"><div class="tool-logo">📉</div><div class="tool-name">D3.js</div><div class="tool-desc">JavaScript library for custom, complex visualizations. Advanced — learn later in career.</div><span class="card-tag tag-advanced tool-level">Optional</span></div>
+        </div>
+
+        <h3 style="color:var(--gold-light); font-size:0.8rem; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:1rem;">🐍 Programming</h3>
+        <div class="tools-grid" style="margin-bottom:2rem">
+          <div class="tool-card"><div class="tool-logo">🐍</div><div class="tool-name">Python</div><div class="tool-desc">The #1 data analysis programming language. Learn it through practical data projects, not abstract coding exercises.</div><span class="card-tag tag-beginner tool-level">Essential</span></div>
+          <div class="tool-card"><div class="tool-logo">🔢</div><div class="tool-name">NumPy</div><div class="tool-desc">Numerical computing in Python. Powers almost every data library under the hood.</div><span class="card-tag tag-intermediate tool-level">Core</span></div>
+          <div class="tool-card"><div class="tool-logo">📓</div><div class="tool-name">Jupyter Notebook</div><div class="tool-desc">Your coding environment. Mix code, text, and charts in one beautiful document.</div><span class="card-tag tag-beginner tool-level">Daily Use</span></div>
+          <div class="tool-card"><div class="tool-logo">📦</div><div class="tool-name">R (optional)</div><div class="tool-desc">Statistical programming language. Preferred in academia and biostatistics. Python usually covers the need.</div><span class="card-tag tag-advanced tool-level">Optional</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════ BACKGROUNDS ════════════════════════════════ -->
+    <div class="panel" id="panel-backgrounds">
+      <div class="section-wrap">
+        <h2 class="section-title">Your <span>Background</span> Is an Advantage</h2>
+        <p class="section-sub">No matter where you're coming from, your prior knowledge gives you a unique edge in data analytics. Find your path below.</p>
+        <div class="bg-grid">
+          <div class="bg-card"><div class="bg-card-accent" style="background:var(--gold)"></div><div class="bg-emoji">💰</div><div class="bg-title">Commerce / Finance / Accounting</div><div class="bg-sub">You already understand financial metrics, business KPIs, and reporting needs. Excel is second nature. SQL and Power BI will feel like a natural extension of your current work.</div><div class="bg-advantage">Domain expertise in finance analytics is extremely rare and valued.</div></div>
+          <div class="bg-card"><div class="bg-card-accent" style="background:var(--accent-teal)"></div><div class="bg-emoji">🔬</div><div class="bg-title">Science (Biology / Chemistry / Physics)</div><div class="bg-sub">You already think statistically and understand experimental design. Your analytical rigor is a massive advantage. Python and statistics will feel intuitive.</div><div class="bg-advantage">Perfect fit for pharma, biotech, and research analytics roles.</div></div>
+          <div class="bg-card"><div class="bg-card-accent" style="background:var(--accent-violet)"></div><div class="bg-emoji">🧠</div><div class="bg-title">Psychology / Social Sciences</div><div class="bg-sub">You understand human behavior, survey design, and statistical testing (t-tests, ANOVA). Your user research skills are in high demand in product and UX analytics.</div><div class="bg-advantage">Ideal for product analytics, UX research, and behavioral analytics.</div></div>
+          <div class="bg-card"><div class="bg-card-accent" style="background:var(--accent-rose)"></div><div class="bg-emoji">📢</div><div class="bg-title">Marketing / Communications</div><div class="bg-sub">You understand audiences, campaigns, and brand narrative. Marketing analytics is one of the most accessible entry points — Google Analytics, A/B testing, and funnel analysis are your first targets.</div><div class="bg-advantage">Digital marketing analytics is booming and welcomes non-tech backgrounds.</div></div>
+          <div class="bg-card"><div class="bg-card-accent" style="background:var(--gold)"></div><div class="bg-emoji">⚕️</div><div class="bg-title">Healthcare / Nursing / Medicine</div><div class="bg-sub">You understand clinical outcomes, patient data, and the critical importance of data accuracy. Health informatics and clinical data analysis are rapidly growing fields.</div><div class="bg-advantage">Healthcare analytics pays premium and desperately needs domain experts.</div></div>
+          <div class="bg-card"><div class="bg-card-accent" style="background:var(--accent-teal)"></div><div class="bg-emoji">🎨</div><div class="bg-title">Arts / Design / Humanities</div><div class="bg-sub">Your ability to tell stories, think creatively, and communicate clearly is genuinely rare among analysts. Data visualization and storytelling will be your superpower.</div><div class="bg-advantage">Data storytelling and visualization design are increasingly in demand.</div></div>
+          <div class="bg-card"><div class="bg-card-accent" style="background:var(--accent-violet)"></div><div class="bg-emoji">⚖️</div><div class="bg-title">Law / Political Science</div><div class="bg-sub">You understand policy, regulation, and complex documents. Compliance analytics, legal tech data roles, and government data analysis are natural fits.</div><div class="bg-advantage">Regulatory data analysis in fintech and legal tech is niche and lucrative.</div></div>
+          <div class="bg-card"><div class="bg-card-accent" style="background:var(--accent-rose)"></div><div class="bg-emoji">🏭</div><div class="bg-title">Engineering (Non-CS)</div><div class="bg-sub">Mechanical, civil, or electrical engineers have strong quantitative foundations. You can pivot quickly — focus on Python and SQL and you'll progress faster than most.</div><div class="bg-advantage">Industrial analytics, IoT, and supply chain analytics love engineering backgrounds.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════ RESOURCES ════════════════════════════════ -->
+    <div class="panel" id="panel-resources">
+      <div class="section-wrap">
+        <h2 class="section-title">Free & Paid <span>Learning Resources</span></h2>
+        <p class="section-sub">Curated resources across platforms — from absolute beginner to job-ready level.</p>
+
+        <h3 style="color:var(--gold-light); font-size:0.8rem; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:1rem;">🆓 Completely Free</h3>
+        <div style="margin-bottom:2rem">
+          <a href="#" class="resource-row"><div class="resource-icon">🏆</div><div class="resource-info"><div class="resource-name">Kaggle Learn</div><div class="resource-meta">Python, SQL, Data Viz, ML — micro-courses with hands-on exercises</div></div><span class="resource-badge badge-free">Free</span></a>
+          <a href="#" class="resource-row"><div class="resource-icon">📺</div><div class="resource-info"><div class="resource-name">StatQuest with Josh Starmer</div><div class="resource-meta">YouTube channel — best statistics and ML explanations on the internet</div></div><span class="resource-badge badge-free">Free</span></a>
+          <a href="#" class="resource-row"><div class="resource-icon">🎓</div><div class="resource-info"><div class="resource-name">Khan Academy Statistics</div><div class="resource-meta">Foundational statistics from scratch. Perfect for beginners.</div></div><span class="resource-badge badge-free">Free</span></a>
+          <a href="#" class="resource-row"><div class="resource-icon">💻</div><div class="resource-info"><div class="resource-name">freeCodeCamp — Data Analysis with Python</div><div class="resource-meta">Full certification course: NumPy, Pandas, Matplotlib, and projects</div></div><span class="resource-badge badge-free">Free</span></a>
+          <a href="#" class="resource-row"><div class="resource-icon">🗄️</div><div class="resource-info"><div class="resource-name">SQLZoo</div><div class="resource-meta">Interactive SQL tutorial — from SELECT basics to complex window functions</div></div><span class="resource-badge badge-free">Free</span></a>
+          <a href="#" class="resource-row"><div class="resource-icon">🌐</div><div class="resource-info"><div class="resource-name">Google Data Analytics Certificate (Audit)</div><div class="resource-meta">Coursera — audit for free. Covers SQL, R, Tableau, and case studies</div></div><span class="resource-badge badge-free">Free (Audit)</span></a>
+          <a href="#" class="resource-row"><div class="resource-icon">🐍</div><div class="resource-info"><div class="resource-name">CS50P — Python by Harvard</div><div class="resource-meta">Free Harvard course. The gold standard for Python fundamentals.</div></div><span class="resource-badge badge-free">Free</span></a>
+          <a href="#" class="resource-row"><div class="resource-icon">📊</div><div class="resource-info"><div class="resource-name">Tableau Public Training Videos</div><div class="resource-meta">Official Tableau free training — learn dashboard building from scratch</div></div><span class="resource-badge badge-free">Free</span></a>
+        </div>
+
+        <h3 style="color:var(--gold-light); font-size:0.8rem; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:1rem;">💳 Paid (Worth It)</h3>
+        <div style="margin-bottom:2rem">
+          <a href="#" class="resource-row"><div class="resource-icon">🔵</div><div class="resource-info"><div class="resource-name">365 Data Science</div><div class="resource-meta">Best structured curriculum for beginners. $59/year. Highly recommended.</div></div><span class="resource-badge badge-paid">Paid</span></a>
+          <a href="#" class="resource-row"><div class="resource-icon">🎯</div><div class="resource-info"><div class="resource-name">DataCamp</div><div class="resource-meta">Hands-on platform covering Python, SQL, R, Power BI. $25/month.</div></div><span class="resource-badge badge-paid">Paid</span></a>
+          <a href="#" class="resource-row"><div class="resource-icon">📘</div><div class="resource-info"><div class="resource-name">Udemy — Jose Portilla's Python Course</div><div class="resource-meta">~$15 on sale. Comprehensive Python for data analysis. 4.6★ / 400k students.</div></div><span class="resource-badge badge-paid">~$15</span></a>
+          <a href="#" class="resource-row"><div class="resource-icon">🏅</div><div class="resource-info"><div class="resource-name">Google Advanced Data Analytics Certificate</div><div class="resource-meta">Coursera. ~$49/month. Covers Python, ML basics, Tableau, regression.</div></div><span class="resource-badge badge-mixed">Paid / Aid</span></a>
+        </div>
+
+        <h3 style="color:var(--gold-light); font-size:0.8rem; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:1rem;">📖 Books</h3>
+        <div>
+          <a href="#" class="resource-row"><div class="resource-icon">📗</div><div class="resource-info"><div class="resource-name">Python for Data Analysis — Wes McKinney</div><div class="resource-meta">The Pandas creator's own book. Essential reference for data manipulation.</div></div><span class="resource-badge badge-paid">Book</span></a>
+          <a href="#" class="resource-row"><div class="resource-icon">📕</div><div class="resource-info"><div class="resource-name">Storytelling with Data — Cole Knaflic</div><div class="resource-meta">The definitive guide to data visualization and presenting insights clearly.</div></div><span class="resource-badge badge-paid">Book</span></a>
+          <a href="#" class="resource-row"><div class="resource-icon">📘</div><div class="resource-info"><div class="resource-name">The Art of Statistics — David Spiegelhalter</div><div class="resource-meta">Statistics for non-mathematicians. Highly readable and practical.</div></div><span class="resource-badge badge-paid">Book</span></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════ AI MENTOR ════════════════════════════════ -->
+    <div class="panel" id="panel-mentor">
+      <div class="section-wrap">
+        <h2 class="section-title">AI <span>Mentor</span></h2>
+        <p class="section-sub">Ask me anything about becoming a data analyst. I'm here to guide you 24/7.</p>
+        <div class="mentor-wrap">
+          <div class="chat-panel">
+            <div class="chat-header">
+              <div class="chat-avatar">🤖</div>
+              <div>
+                <div class="chat-name">DataPath Mentor</div>
+                <div class="chat-status"><span class="online-dot"></span>Always available</div>
+              </div>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+              <div class="msg">
+                <div class="msg-mini-avatar">🤖</div>
+                <div class="msg-bubble bot">Hello! I'm your personal data analyst mentor. Whether you're just starting out or looking to land your first job, I'm here to guide you. What would you like to know? 😊</div>
+              </div>
+            </div>
+            <div class="chat-input-row">
+              <textarea class="chat-input" id="chatInput" placeholder="Ask me anything about data analytics..." rows="1" onkeydown="handleKey(event)"></textarea>
+              <button class="chat-send" onclick="sendMessage()">➤</button>
+            </div>
+          </div>
+          <div>
+            <div class="quick-q-title">💬 Quick Questions</div>
+            <div class="quick-qs">
+              <button class="quick-q-btn" onclick="askQuestion('I have no coding background. Where do I start?')">🌱 I have no coding background. Where do I start?</button>
+              <button class="quick-q-btn" onclick="askQuestion('How long does it take to become job-ready?')">⏱ How long does it take to become job-ready?</button>
+              <button class="quick-q-btn" onclick="askQuestion('What Python libraries should I learn first?')">🐍 What Python libraries should I learn first?</button>
+              <button class="quick-q-btn" onclick="askQuestion('How do I build a portfolio with no work experience?')">💼 How do I build a portfolio with no work experience?</button>
+              <button class="quick-q-btn" onclick="askQuestion('Is SQL really that important? Can I skip it?')">🗄️ Is SQL really that important? Can I skip it?</button>
+              <button class="quick-q-btn" onclick="askQuestion('What salary can I expect as a junior data analyst?')">💰 What salary can I expect as a junior data analyst?</button>
+              <button class="quick-q-btn" onclick="askQuestion('I have a commerce background. How does that help me?')">🎓 I have a commerce background. How does that help?</button>
+              <button class="quick-q-btn" onclick="askQuestion('What is the difference between a data analyst and a data scientist?')">🔬 Data Analyst vs Data Scientist difference?</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════ CAREER ════════════════════════════════ -->
+    <div class="panel" id="panel-career">
+      <div class="section-wrap">
+        <h2 class="section-title">Career <span>Outlook & Salary</span></h2>
+        <p class="section-sub">Data analytics is one of the fastest growing fields globally. Here's what to expect at each stage of your career.</p>
+
+        <div class="salary-cards">
+          <div class="sal-card"><div class="sal-role">Junior Data Analyst</div><div class="sal-amount">$55K</div><div class="sal-range">Range: $42K – $72K · 0–2 yrs exp</div><div class="sal-bar"><div class="sal-bar-fill" style="width:40%"></div></div></div>
+          <div class="sal-card"><div class="sal-role">Data Analyst</div><div class="sal-amount">$82K</div><div class="sal-range">Range: $65K – $105K · 2–5 yrs exp</div><div class="sal-bar"><div class="sal-bar-fill" style="width:60%"></div></div></div>
+          <div class="sal-card"><div class="sal-role">Senior Data Analyst</div><div class="sal-amount">$110K</div><div class="sal-range">Range: $90K – $140K · 5–8 yrs exp</div><div class="sal-bar"><div class="sal-bar-fill" style="width:78%"></div></div></div>
+          <div class="sal-card"><div class="sal-role">Lead / Principal Analyst</div><div class="sal-amount">$145K</div><div class="sal-range">Range: $120K – $185K · 8+ yrs exp</div><div class="sal-bar"><div class="sal-bar-fill" style="width:90%"></div></div></div>
+        </div>
+
+        <h2 class="section-title" style="margin-top:1rem">Career <span>Paths</span></h2>
+        <p class="section-sub">After gaining experience as a data analyst, multiple career trajectories open up.</p>
+        <div class="card-grid">
+          <div class="card"><div class="card-icon">🔬</div><h3>Data Scientist</h3><p>Add machine learning and predictive modeling to your toolkit. Requires deeper Python and statistics. 30–50% salary jump.</p></div>
+          <div class="card"><div class="card-icon">🏗️</div><h3>Data Engineer</h3><p>Build the pipelines and infrastructure that analysts use. Focus shifts to SQL, Python, Spark, and cloud. Often the highest-paid track.</p></div>
+          <div class="card"><div class="card-icon">📊</div><h3>Business Intelligence Developer</h3><p>Specialize in dashboards, reporting infrastructure, and BI tools. High demand in corporate environments.</p></div>
+          <div class="card"><div class="card-icon">🎯</div><h3>Product Analyst</h3><p>Focused on user behavior, product metrics, and A/B testing. Common in tech companies. Great WLB.</p></div>
+          <div class="card"><div class="card-icon">📈</div><h3>Analytics Manager</h3><p>Lead a team of analysts. Focus shifts to strategy, communication, and business alignment. Director-level roles available.</p></div>
+          <div class="card"><div class="card-icon">🤖</div><h3>ML / AI Engineer</h3><p>The most technical path. Requires strong math, Python, and software engineering skills. Fastest-growing and highest-paying.</p></div>
+        </div>
+
+        <div class="callout" style="margin-top:2rem">
+          <span class="callout-icon">🌍</span>
+          <p><strong>Global context:</strong> Data analyst roles exist in every industry — fintech, healthcare, retail, government, sports, entertainment. The skills are universally transferable, and remote work is common. The Bureau of Labor Statistics projects <strong>25% job growth</strong> in this field through 2030 — much faster than average.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════ INTERVIEW ════════════════════════════════ -->
+    <div class="panel" id="panel-interview">
+      <div class="section-wrap">
+        <h2 class="section-title">Interview <span>Preparation</span></h2>
+        <p class="section-sub">Common data analyst interview questions with detailed answers. Expand each to study.</p>
+
+        <h3 style="color:var(--gold-light); font-size:0.8rem; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:1rem;">🗄️ SQL Questions</h3>
+        <div class="qa-list" style="margin-bottom:2rem">
+          <div class="qa-item">
+            <div class="qa-q" onclick="toggleQA(this)">What is the difference between INNER JOIN and LEFT JOIN? <span class="qa-chevron">▼</span></div>
+            <div class="qa-a">An <code>INNER JOIN</code> returns only rows where there is a match in both tables. A <code>LEFT JOIN</code> returns all rows from the left table and matching rows from the right table — if no match exists, NULLs fill the right-table columns. Use INNER JOIN when you only care about matched records. Use LEFT JOIN when you need to see all records from the primary table regardless of whether a match exists.</div>
+          </div>
+          <div class="qa-item">
+            <div class="qa-q" onclick="toggleQA(this)">What are Window Functions? Give an example. <span class="qa-chevron">▼</span></div>
+            <div class="qa-a">Window functions perform calculations across a set of rows related to the current row — unlike GROUP BY, they don't collapse rows. Example: <code>ROW_NUMBER() OVER (PARTITION BY department ORDER BY salary DESC)</code> assigns a rank to each employee within their department by salary. Common window functions: ROW_NUMBER, RANK, DENSE_RANK, LAG, LEAD, SUM OVER, AVG OVER.</div>
+          </div>
+          <div class="qa-item">
+            <div class="qa-q" onclick="toggleQA(this)">How do you find duplicate records in a table? <span class="qa-chevron">▼</span></div>
+            <div class="qa-a">Use <code>GROUP BY</code> with <code>HAVING COUNT(*) > 1</code>: <br/><code>SELECT email, COUNT(*) FROM users GROUP BY email HAVING COUNT(*) > 1</code>. This returns all emails that appear more than once. To find the full duplicate rows, wrap this in a subquery or use a CTE with ROW_NUMBER.</div>
+          </div>
+          <div class="qa-item">
+            <div class="qa-q" onclick="toggleQA(this)">What is a CTE and when would you use it? <span class="qa-chevron">▼</span></div>
+            <div class="qa-a">A CTE (Common Table Expression) is a temporary named result set defined with <code>WITH</code> before the main query. Use it to: (1) break complex queries into readable steps, (2) reference the same subquery multiple times, (3) write recursive queries. CTEs improve readability dramatically and are preferred over deeply nested subqueries in modern SQL.</div>
+          </div>
+        </div>
+
+        <h3 style="color:var(--gold-light); font-size:0.8rem; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:1rem;">📊 Statistics & Analytical Thinking</h3>
+        <div class="qa-list" style="margin-bottom:2rem">
+          <div class="qa-item">
+            <div class="qa-q" onclick="toggleQA(this)">What is the difference between mean, median, and mode? When do you use each? <span class="qa-chevron">▼</span></div>
+            <div class="qa-a">Mean is the arithmetic average — use it for normally distributed data. Median is the middle value — use it when data is skewed or has outliers (e.g. income distributions). Mode is the most frequent value — use it for categorical data or finding the most common occurrence. A key insight: if mean ≠ median, your data is skewed. Always report which measure you used and why.</div>
+          </div>
+          <div class="qa-item">
+            <div class="qa-q" onclick="toggleQA(this)">How would you explain a p-value to a non-technical manager? <span class="qa-chevron">▼</span></div>
+            <div class="qa-a">A p-value tells you: "If there were no real effect, what's the probability of seeing results this extreme just by chance?" A p-value of 0.03 means there's only a 3% chance the result is due to random noise. We typically use 0.05 (5%) as the threshold — if p &lt; 0.05, we say the result is statistically significant. Avoid saying "the result is proven" — statistical significance means we have strong enough evidence to act, not absolute certainty.</div>
+          </div>
+          <div class="qa-item">
+            <div class="qa-q" onclick="toggleQA(this)">What steps do you take when you encounter missing data? <span class="qa-chevron">▼</span></div>
+            <div class="qa-a">Step 1: Understand why data is missing — is it random (MCAR), related to other variables (MAR), or systematically missing (MNAR)? Step 2: Quantify — how many rows/columns are affected? Step 3: Options: (a) Remove rows if <5% missing and random, (b) Impute with mean/median/mode for numeric data, (c) Use forward/backward fill for time series, (d) Flag missing as a separate category for categorical data. Always document your decision and its potential impact on results.</div>
+          </div>
+        </div>
+
+        <h3 style="color:var(--gold-light); font-size:0.8rem; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:1rem;">💼 Behavioral Questions</h3>
+        <div class="qa-list">
+          <div class="qa-item">
+            <div class="qa-q" onclick="toggleQA(this)">Tell me about a time you used data to influence a business decision. <span class="qa-chevron">▼</span></div>
+            <div class="qa-a">Use the STAR method: Situation (context), Task (what you needed to do), Action (what analysis you performed), Result (what decision was made and its impact). For portfolio projects, frame them as: "I analyzed customer churn data for a hypothetical e-commerce company. I found that customers who hadn't purchased in 30+ days had an 85% churn rate. I recommended a targeted email campaign for the 25–35 day window, which in similar industry studies showed 20% retention improvement."</div>
+          </div>
+          <div class="qa-item">
+            <div class="qa-q" onclick="toggleQA(this)">How do you handle a situation where a stakeholder disagrees with your analysis? <span class="qa-chevron">▼</span></div>
+            <div class="qa-a">First, listen fully — they may have domain context you don't. Then: (1) Walk through your methodology transparently. (2) Ask what specific conclusion they disagree with. (3) Explore whether both views can coexist — maybe the data shows one thing but business context changes the recommendation. (4) If still disagreeing, propose additional data collection or a controlled test to resolve the question objectively. Never become defensive — your job is to find the truth together, not to "win."</div>
+          </div>
+          <div class="qa-item">
+            <div class="qa-q" onclick="toggleQA(this)">How do you prioritize when you have multiple analyses to complete? <span class="qa-chevron">▼</span></div>
+            <div class="qa-a">I use a framework based on: (1) Business impact — what decision does this analysis unblock? (2) Deadline — what has a hard date? (3) Effort vs. value — can a quick analysis deliver 80% of the insight? I communicate my prioritization to stakeholders proactively and set expectations clearly. For complex projects I break them into phases and deliver early insights first, rather than waiting for a perfect final analysis.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════ TRACKER ════════════════════════════════ -->
+    <div class="panel" id="panel-tracker">
+      <div class="section-wrap">
+        <h2 class="section-title">Progress <span>Tracker</span></h2>
+        <p class="section-sub">Check off milestones as you complete them. Your progress is saved in this session.</p>
+
+        <div class="progress-row">
+          <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+          <div class="progress-label" id="progressLabel">0% Complete</div>
+        </div>
+
+        <div class="checklist" id="checklist">
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>Foundation:</strong> Researched what data analysts do and read 5 job descriptions</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>Foundation:</strong> Installed Python (Anaconda), VS Code, and created GitHub / Kaggle accounts</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>Excel:</strong> Learned VLOOKUP, INDEX-MATCH, and Pivot Tables</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>Excel:</strong> Built a sales dashboard using a public dataset</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>SQL:</strong> Completed SQLZoo or Mode Analytics SQL tutorial</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>SQL:</strong> Mastered JOINs, GROUP BY, subqueries, and CTEs</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>SQL:</strong> Practiced window functions (ROW_NUMBER, LAG, LEAD)</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>Statistics:</strong> Completed Khan Academy Statistics course</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>Statistics:</strong> Understand p-values, hypothesis testing, and correlation</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>Python:</strong> Learned Python basics (loops, functions, lists, dictionaries)</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>Python:</strong> Can read, filter, group, and merge DataFrames with Pandas</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>Python:</strong> Built charts with Matplotlib and Seaborn</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>Visualization:</strong> Created a Tableau Public dashboard and published it</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>Visualization:</strong> Built a Power BI report with multiple visuals and filters</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>Portfolio:</strong> Completed and published 1st data analysis project on GitHub</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>Portfolio:</strong> Completed and published 2nd project (different domain)</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>Portfolio:</strong> Completed and published 3rd project (end-to-end with dashboard)</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>Career:</strong> Optimized LinkedIn profile with skills and project links</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>Career:</strong> Written a 1-page ATS-optimized resume</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>Interview:</strong> Practiced answering 10+ SQL interview questions</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>Interview:</strong> Practiced 5 behavioral questions using the STAR method</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>Job Search:</strong> Applied to 10+ data analyst positions</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>🎉 MILESTONE:</strong> Received first data analyst interview invitation!</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>🚀 GOAL:</strong> Received and accepted a data analyst job offer!</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+// ── TAB SWITCHING ──
+function switchTab(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  if (btn) btn.classList.add('active');
+  updateSidebarActive(id);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function showPanel(id) {
+  const idx = ['home','roadmap','skills','backgrounds','resources','mentor','career','interview','tracker'].indexOf(id);
+  const btns = document.querySelectorAll('.tab-btn');
+  switchTab(id, btns[idx]);
+}
+function updateSidebarActive(id) {
+  const map = { home: 0, roadmap: 1, skills: 2, backgrounds: 3, resources: 4, mentor: 5, career: 6, interview: 7, tracker: 8 };
+  document.querySelectorAll('.sidebar-item').forEach((el, i) => {
+    el.classList.toggle('active', i === map[id]);
+  });
+}
+
+// ── SIDEBAR ──
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('overlay');
+  const hb = document.getElementById('hamburger');
+  sb.classList.toggle('open');
+  ov.classList.toggle('open');
+  hb.classList.toggle('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('hamburger').classList.remove('open');
+}
+
+// ── PROGRESS BAR ──
+window.addEventListener('scroll', () => {
+  const el = document.documentElement;
+  const pct = (el.scrollTop / (el.scrollHeight - el.clientHeight)) * 100;
+  document.getElementById('progressBar').style.width = pct + '%';
+});
+
+// ── ROADMAP EXPAND ──
+function togglePhase(header) {
+  const body = header.nextElementSibling?.nextElementSibling || header.parentElement.querySelector('.rm-expand-body');
+  const bodyEl = header.closest('.rm-phase').querySelector('.rm-expand-body');
+  if (bodyEl) bodyEl.classList.toggle('open');
+}
+
+// ── ACCORDION ──
+function toggleQA(qEl) {
+  const item = qEl.closest('.qa-item');
+  item.classList.toggle('open');
+}
+
+// ── CHECKLIST ──
+function toggleCheck(item) {
+  item.classList.toggle('done');
+  updateProgress();
+}
+function updateProgress() {
+  const items = document.querySelectorAll('.check-item');
+  const done = document.querySelectorAll('.check-item.done').length;
+  const pct = Math.round((done / items.length) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = pct + '% Complete';
+}
+
+// ── AI MENTOR CHAT ──
+const mentorResponses = {
+  'no coding background': "Great news — you absolutely don't need a coding background to start! Begin with Excel and SQL first. Both are highly intuitive and feel more like learning a language than programming. Once you're comfortable with those (4–6 weeks), Python will feel much less intimidating. Kaggle's free Python course is designed specifically for beginners with zero coding experience. Take it one step at a time and you'll be surprised how fast you progress! 🌱",
+  'how long': "Most dedicated learners become job-ready in 6–12 months with 1–2 hours of learning per day. Here's a rough timeline: Months 1–2: Excel + SQL basics. Months 2–4: Statistics + Python fundamentals. Months 4–6: Visualization + first portfolio projects. Months 6–9: 3 polished portfolio projects + job applications. Some people do it faster, some slower — consistency matters more than speed. You've got this! ⏱",
+  'python libraries': "For data analysis, learn these in this exact order: 1️⃣ Pandas — data manipulation (most important). 2️⃣ NumPy — numerical operations (often used alongside Pandas). 3️⃣ Matplotlib — basic charting. 4️⃣ Seaborn — beautiful statistical charts. 5️⃣ Plotly — interactive charts. Skip scikit-learn (machine learning) until you're comfortable with the above. Kaggle's free Python and Pandas courses are perfect starting points!",
+  'portfolio': "Building a portfolio without work experience is completely doable! Here's how: 1️⃣ Use free public datasets from Kaggle, UCI ML Repository, or government open data portals. 2️⃣ Frame each project as solving a real business problem (e.g. 'Analyzing customer churn for a subscription service'). 3️⃣ Include data cleaning, EDA, visualization, and a clear findings section. 4️⃣ Publish on GitHub and Kaggle. 5️⃣ Create a Tableau Public dashboard for visual impact. 3 deep projects beats 10 shallow ones — quality is everything! 💼",
+  'sql': "SQL is absolutely non-negotiable — do NOT skip it! It appears in ~90% of data analyst job postings and is used daily in almost every data role. The good news: SQL is genuinely not hard to learn. Basic SELECT, WHERE, GROUP BY queries feel very intuitive within days. Invest 4–6 weeks and reach a solid intermediate level (JOINs, CTEs, window functions). Use SQLZoo and Kaggle's SQL courses — both are free. SQL fluency is probably the single highest-ROI skill investment you can make for this career. 🗄️",
+  'salary': "Salaries vary by location and company, but here's a realistic global picture: 🟡 Junior Data Analyst (0–2 yrs): $42K–$72K. 🟠 Data Analyst (2–5 yrs): $65K–$105K. 🔴 Senior Data Analyst (5–8 yrs): $90K–$140K. 💼 In tech companies (FAANG-adjacent), salaries can be 30–50% higher. Freelance/consulting rates typically range $50–$150/hour once experienced. Location matters a lot — NYC, SF, London, and Singapore pay significantly more than other cities. 💰",
+  'commerce': "A commerce background is a genuine advantage! Here's why: You already understand financial metrics, P&L statements, and business KPIs — this domain knowledge is rare and valuable. Excel likely feels natural to you. You understand how businesses make decisions. Focus on: Power BI (widely used in finance/accounting), SQL (for querying financial databases), and basic Python. Finance analytics, banking analytics, and retail analytics roles love commerce backgrounds. You're not starting from zero — you're starting from a different place of strength! 📊",
+  'data analyst vs data scientist': "Great question! Key differences: 📊 Data Analyst: Focuses on describing WHAT happened. Tools: SQL, Excel, Tableau/Power BI, basic Python. No ML required. Entry-level friendly. 🔬 Data Scientist: Focuses on predicting WHAT WILL happen. Tools: Python, ML libraries (scikit-learn, TensorFlow), statistics. Usually requires 1–2 years of analyst experience first. Salary: Data scientists earn ~20–40% more but require significantly more technical depth. For most career changers, starting as a data analyst is the smarter path — it's more accessible, faster to enter, and can lead to data science later if desired."
+};
+
+function getResponse(msg) {
+  const lower = msg.toLowerCase();
+  for (const [key, resp] of Object.entries(mentorResponses)) {
+    if (lower.includes(key)) return resp;
+  }
+  // Generic responses
+  const generic = [
+    "That's a great question! Data analytics is a vast field with many exciting directions. The key is to start with the fundamentals — SQL, Excel, and basic statistics — before expanding into Python and visualization tools. Check out the Roadmap tab for a structured step-by-step path tailored to your journey. Is there a specific phase you'd like more detail on? 🗺️",
+    "Excellent question! The data analytics journey can feel overwhelming, but breaking it into phases makes it very manageable. Focus on one skill at a time, build projects along the way, and remember that consistency beats intensity. Would you like me to point you to specific resources for this topic? 📚",
+    "I love your curiosity — that's exactly the mindset that makes great analysts! The short answer is: start practical, not theoretical. Real datasets and real questions teach you far more than abstract courses. Use the Resources tab to find curated free materials, and the Roadmap tab to see how everything fits together. Any specific skill area you want to dive deeper into? 🎯"
+  ];
+  return generic[Math.floor(Math.random() * generic.length)];
+}
+
+function addMessage(text, isUser) {
+  const container = document.getElementById('chatMessages');
+  const msg = document.createElement('div');
+  msg.className = 'msg' + (isUser ? ' user' : '');
+  msg.innerHTML = `
+    <div class="msg-mini-avatar">${isUser ? '👤' : '🤖'}</div>
+    <div class="msg-bubble ${isUser ? 'user-msg' : 'bot'}">${text}</div>
+  `;
+  container.appendChild(msg);
+  container.scrollTop = container.scrollHeight;
+}
+
+function addTyping() {
+  const container = document.getElementById('chatMessages');
+  const msg = document.createElement('div');
+  msg.className = 'msg';
+  msg.id = 'typing-indicator';
+  msg.innerHTML = `<div class="msg-mini-avatar">🤖</div><div class="msg-bubble bot"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
+  container.appendChild(msg);
+  container.scrollTop = container.scrollHeight;
+}
+
+function removeTyping() {
+  const t = document.getElementById('typing-indicator');
+  if (t) t.remove();
+}
+
+function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  addMessage(text, true);
+  input.value = '';
+  addTyping();
+  setTimeout(() => {
+    removeTyping();
+    addMessage(getResponse(text), false);
+  }, 900 + Math.random() * 600);
+}
+
+function askQuestion(q) {
+  switchTab('mentor', document.querySelectorAll('.tab-btn')[5]);
+  setTimeout(() => {
+    addMessage(q, true);
+    addTyping();
+    setTimeout(() => {
+      removeTyping();
+      addMessage(getResponse(q), false);
+    }, 900 + Math.random() * 600);
+  }, 100);
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+</script>
+</body>
+</html>
